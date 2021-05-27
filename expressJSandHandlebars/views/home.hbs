@@ -1,0 +1,18 @@
+<h1>It's working!</h1>
+<span>Name {{name}}</span><br>
+<span>Age {{age}}</span><br>
+
+<h3>Items in pocket</h3>
+{{!-- <ul>
+    {{#each items}} // each се нарича helper
+    <li>{{this}}</li>
+    {{/each}}
+</ul> --}}
+
+<ul>
+    {{#each items}}
+    {{> item}}
+    {{else}}
+    <li>NO items!</li>
+    {{/each}}
+</ul>
