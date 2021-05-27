@@ -1,7 +1,6 @@
 const database = require('../util/database');
 
-
-module.exports = (req, res) => {
+function deleteController(req, res) {
     const id = req.url.split('=')[1];
     database.deleteItem(id);
 
@@ -10,3 +9,4 @@ module.exports = (req, res) => {
     });
     res.end();
 }
+module.exports = deleteController;

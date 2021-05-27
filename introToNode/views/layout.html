@@ -1,14 +1,17 @@
-module.exports = (html, title = 'Home') => `
 <html>
+
 <head>
-    <title>My page - ${title}</title>
+    <title>My page - {{title}}</title>
+    <link rel="stylesheet" href="../static/site.css">
 </head>
+
 <body>
     <nav>
         <a href="/">Home</a>
         <a href="/catalog">Catalog</a>
         <a href="/about">About</a>
     </nav>
-    ${html}
+    {{body}}
 </body>
-</html>`
+
+</html>
