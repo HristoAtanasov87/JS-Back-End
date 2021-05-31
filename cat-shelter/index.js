@@ -1,14 +1,12 @@
 const http = require('http');
 const port = 3000;
-const handlers = require('./handlers');
+const handlers = require('./handlers/index');
 
-const server = http.createServer((req, res) => {
+http.createServer((req, res) => {
 
     for (let handler of handlers) {
         if (!handler(req, res)) {
             break;
         }
     }
-});
-
-server.listen(port);
+}).listen(port, () => console.log(`Server is listening on port ${port}`));
