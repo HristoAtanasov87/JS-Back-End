@@ -25,9 +25,11 @@ module.exports = {
             await req.storage.edit(req.params.id, cube);
             res.redirect('/');
         } catch (err) {
-            res.redirect('404');
+            cube[`select${cube.difficulty}`] = true;
+            cube['_id'] = req.params.id;
+            if (err.name == 'ValidationError') {
+                return res.render('edit', { title: 'Edit Cube', error: 'All fields are required. Image Url must be a valid URL.', cube });
+            }
         }
-
     }
-
 }

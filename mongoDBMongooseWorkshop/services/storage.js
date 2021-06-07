@@ -1,83 +1,103 @@
-const fs = require('fs/promises');
-const uniqid = require('uniqid');
-
-//load and parse data file
-//provide ability to:
-// - read all entries
-// - read single entry by ID
-// - add new entry
-// * get matching entries by search criteria 
-
-let data = {};
+const Cube = require('../models/Cube');
+const Comment = require('../models/Comment');
+const Accessory = require('../models/Accessory');
 
 async function init() {
-    try {
-        data = JSON.parse(await fs.readFile('./models/data.json'));
-    } catch (err) {
-        console.error('Error reading database');
-    }
+
 
     return (req, res, next) => {
         req.storage = {
             getAll,
             getById,
             create,
-            edit
+            edit,
+            createComment,
+            createAccessory,
+            getAllAccessories,
+            attachSticker
         }
         next();
     }
 }
 
 async function getAll(query) {
-    let cubes = Object
-        .entries(data)
-        .map(([id, v]) => Object.assign({}, { id }, v));
+    const options = {};
 
     //filter cubes by query params
     if (query.search) {
-        cubes = cubes.filter(c => c.name.toLowerCase().includes(query.search.toLowerCase()));
+        options.name = { $regex: query.search, $options: 'i' }
     }
     if (query.from) {
-        cubes = cubes.filter(c => c.difficulty >= Number(query.from));
+        options.difficulty = { $gte: Number(query.from) };
     }
     if (query.to) {
-        cubes = cubes.filter(c => c.difficulty <= Number(query.from));
-
+        options.difficulty = options.difficulty || {}
+        options.difficulty.$lte = Number(query.to);
     }
+
+    const cubes = Cube.find(options).lean();
 
     return cubes;
 }
 
 async function getById(id) {
-    const cube = data[id];
+    const cube = await Cube.findById(id).populate('comments').populate('accessories').lean();
     if (cube) {
-        return Object.assign({}, { id }, cube);
+        return cube;
     } else {
         return undefined;
     }
 }
 
 async function create(cube) {
-    const id = uniqid();
-    data[id] = cube;
-
-    await persist();
+    const record = new Cube(cube);
+    return record.save();
 }
 
 async function edit(id, cube) {
-    if (!data[id]) {
+    const existing = await Cube.findById(id);
+
+    if (!existing) {
         throw new ReferenceError('This id doesn\'t exist.')
     }
-    data[id] = cube;
-    await persist();
+    Object.assign(existing, cube);
+    return existing.save();
 }
 
-async function persist() {
-    try {
-        await fs.writeFile('./models/data.json', JSON.stringify(data, null, 2));
-    } catch (err) {
-        console.error('Error writing database');
+async function createComment(cubeId, comment) {
+    const cube = await Cube.findById(cubeId);
+
+    if (!cube) {
+        throw new ReferenceError('This id doesn\'t exist.')
     }
+
+    const newComment = new Comment(comment);
+    await newComment.save();
+
+    cube.comments.push(newComment);
+    await cube.save();
+}
+
+async function getAllAccessories(existing) {
+
+    return Accessory.find({ _id: { $nin: existing } }).lean();
+}
+
+async function createAccessory(accessory) {
+    const record = new Accessory(accessory);
+    return record.save();
+}
+
+async function attachSticker(cubeId, stickerId) {
+    const cube = await Cube.findById(cubeId);
+    const sticker = await Accessory.findById(stickerId);
+
+    if (!cube || !sticker) {
+        throw new ReferenceError('This id doesn\'t exist.')
+    }
+
+    cube.accessories.push(sticker);
+    return cube.save();
 }
 
 module.exports = {
@@ -85,5 +105,9 @@ module.exports = {
     getAll,
     getById,
     create,
-    edit
+    edit,
+    createComment,
+    createAccessory,
+    getAllAccessories,
+    attachSticker
 }
