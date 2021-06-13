@@ -25,7 +25,10 @@ async function getAll(query) {
 async function getById(id) {
     const cube = await Cube
         .findById(id)
-        .populate('comments')
+        .populate({
+            path: 'comments',
+            populate: { path: 'author' }
+        })
         .populate('accessories')
         .populate('author')
         .lean();
@@ -37,7 +40,7 @@ async function getById(id) {
             description: cube.description,
             imageUrl: cube.imageUrl,
             difficulty: cube.difficulty,
-            comments: cube.comments,
+            comments: cube.comments.map(c => ({ content: c.content, author: c.author.username })),
             accessories: cube.accessories,
             author: cube.author.username,
             authorId: cube.author._id
@@ -61,6 +64,16 @@ async function edit(id, cube) {
     }
     Object.assign(existing, cube);
     return existing.save();
+}
+
+async function deleteCube(id) {
+    const existing = await Cube.findById(id);
+
+    if (!existing) {
+        throw new ReferenceError('This id doesn\'t exist.')
+    } else {
+        await Cube.findByIdAndDelete(id);
+    }
 }
 
 async function createComment(cubeId, comment) {
@@ -94,6 +107,7 @@ module.exports = {
     getById,
     create,
     edit,
+    deleteCube,
     createComment,
     attachSticker
 }

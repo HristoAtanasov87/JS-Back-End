@@ -114,4 +114,25 @@ router.post('/details/attach/:cubeId', async (req, res) => {
     res.redirect(`/details/${cubeId}`);
 });
 
+router.get('/delete/:id', preloadCube(), isOwner(), async (req, res) => {
+    const cube = req.data.cube;
+
+    if (!cube) {
+        res.redirect('/404');
+    } else {
+        cube[`select${cube.difficulty}`] = true;
+
+        const ctx = {
+            title: 'Delete Cube',
+            cube
+        }
+        res.render('delete', ctx);
+    }
+});
+
+router.post('/delete/:id', async (req, res) => {
+    await req.storage.deleteCube(req.params.id);
+    res.redirect('/products');
+});
+
 module.exports = router;

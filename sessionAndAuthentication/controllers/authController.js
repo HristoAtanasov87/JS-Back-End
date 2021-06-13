@@ -45,8 +45,5 @@ router.get('/logout', isAuth(), (req, res) => {
     res.redirect('/products');
 })
 
-router.get('/delete', (req, res) => {
-    res.render('delete', { title: 'Delete' });
-});
 
 module.exports = router;

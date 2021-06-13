@@ -12,8 +12,6 @@ function preloadCube() {
             console.error('Database error:', err.message);
         }
 
-
-
         next();
     }
 }
