@@ -19,7 +19,8 @@ router.post(
     async (req, res) => {
         const { errors } = validationResult(req);
         try {
-            if (errors.length) {
+            if (errors.length > 0) {
+                const message = errors.map(e => e.msg).join('\n');
                 //TODO improve error messages
                 throw new Error('Validation error');
             }
@@ -29,7 +30,7 @@ router.post(
             res.redirect('/'); //TODO change redirect as requirements in the project
         } catch (err) {
             const ctx = {
-                errors,
+                errors: err.message.split('\n'),
                 userData: {
                     username: req.body.username
                 }

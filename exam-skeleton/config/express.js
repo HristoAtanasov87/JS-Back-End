@@ -3,7 +3,7 @@ const cookieParser = require('cookie-parser');
 const hbs = require('express-handlebars');
 
 const authMiddleware = require('../middlewares/auth');
-
+const storageMiddleware = require('../middlewares/storage');
 
 module.exports = (app) => {
     app.engine('hbs', hbs({
@@ -15,6 +15,7 @@ module.exports = (app) => {
     app.use(express.urlencoded({ extended: true }));
     app.use(cookieParser());
     app.use(authMiddleware());
+    app.use(storageMiddleware());
 
     app.use((req, res, next) => {
         console.log('>>>', req.method, req.url);
@@ -25,5 +26,5 @@ module.exports = (app) => {
         next()
     })
 
-    //TODO add storage middlewares
+
 };
