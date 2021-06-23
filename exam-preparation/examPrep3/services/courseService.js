@@ -8,7 +8,7 @@ async function getAllCourses(sortMethod, searchCriteria) {
 }
 
 async function getCourseById(id) {
-    return await Course.findById(id).populate('usersEnrolled').lean();
+    return await Course.findById(id).populate('usersEnrolled').lean(); // za da imash cqloto info zad id-to na enroll-natiq chovek polzvash populate
 }
 
 async function createCourse(courseData) {
