@@ -1,4 +1,6 @@
+const { unsubscribe } = require('../controllers/hotelController');
 const Hotel = require('../models/Hotel');
+const User = require('../models/User');
 
 async function createHotel(hotelData) {
     const hotel = new Hotel(hotelData);
@@ -16,11 +18,38 @@ async function getAllHotels() {
 async function getHotelById(id) {
     const hotel = await Hotel.findById(id).lean();
 
-    return Hotel;
+    return hotel;
+}
+
+async function editHotel(id, hotelData) {
+    const hotel = await Hotel.findById(id);
+
+    hotel.name = hotelData.name;
+    hotel.city = hotelData.city;
+    hotel.imageUrl = hotelData.imageUrl;
+    hotel.rooms = Number(hotelData.rooms);
+
+    return hotel.save();
+}
+
+async function bookHotel(hotelId, userId) {
+    const hotel = await Hotel.findById(hotelId);
+    const user = await User.findById(userId);
+
+    if (user._id == hotel.owner) {
+        throw new Error('Cannot book hotel you have created!');
+    }
+
+    user.bookedHotels.push(hotel);
+    hotel.bookedBy.push(user)
+
+    return Promise.all([user.save(), hotel.save()]);
 }
 
 module.exports = {
     createHotel,
     getAllHotels,
-    getHotelById
+    getHotelById,
+    editHotel,
+    bookHotel
 };
