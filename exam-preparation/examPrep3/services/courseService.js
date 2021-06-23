@@ -1,3 +1,4 @@
+const { populate } = require('../models/Course');
 const Course = require('../models/Course');
 
 
@@ -7,7 +8,7 @@ async function getAllCourses(sortMethod, searchCriteria) {
 }
 
 async function getCourseById(id) {
-    return await Course.findById(id).lean();
+    return await Course.findById(id).populate('usersEnrolled').lean();
 }
 
 async function createCourse(courseData) {
