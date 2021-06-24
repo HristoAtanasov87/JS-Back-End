@@ -54,8 +54,13 @@ router.post('/login', isGuest(), async (req, res) => {
 
         res.redirect('/'); //TODO change redirect as requirements in the project
     } catch (err) {
+        let errors = [err.message];
+        if (err.type == 'credential') {
+            errors = ['Incorrect username or password!'];
+        }
+
         const ctx = {
-            errors: [err.message],
+            errors,
             userData: {
                 username: req.body.username
             }
@@ -68,6 +73,17 @@ router.post('/login', isGuest(), async (req, res) => {
 router.get('/logout', (req, res) => {
     req.auth.logout();
     res.redirect('/');
+});
+
+router.get('/user', isUser(), async (req, res) => {
+    const userRefreshed = await req.auth.refresh(req.user.username);
+    listOfHotels = userRefreshed.bookedHotels.map(h => `${h.name}, `);
+
+    const ctx = {
+        user: req.user,
+        listOfHotels
+    }
+    res.render('profile', ctx);
 });
 
 module.exports = router;

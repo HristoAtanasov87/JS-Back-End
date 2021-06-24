@@ -16,6 +16,9 @@ module.exports = () => (req, res, next) => {
             },
             logout: () => {
                 res.clearCookie(COOKIE_NAME);
+            },
+            async refresh(username) {
+                return await refresh(username);
             }
         };
 
@@ -37,8 +40,6 @@ async function register(username, email, password) {
         throw new Error('Email is taken!');
     }
 
-
-
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await userService.createUser(username, email, hashedPassword);
 
@@ -49,18 +50,30 @@ async function login(username, password) {
     const user = await userService.getUserByUsername(username);
 
     if (!user) {
-        throw new Error('No such user');
+        const err = new Error('No such user');
+        err.type = 'credential';
+        throw err;
     }
 
     const hasMatch = await bcrypt.compare(password, user.hashedPassword);
 
     if (!hasMatch) {
-        throw new Error('Incorrect password');
+        const err = new Error('Incorrect password');
+        err.type = 'credential';
+        throw err;
     }
 
     return generateToken(user);
+}
 
+async function refresh(username) {
+    const user = await userService.getUserByUsername(username);
 
+    if (!user) {
+        throw new Error('No such user');
+    }
+
+    return user;
 }
 
 function generateToken(userData) {
@@ -68,6 +81,7 @@ function generateToken(userData) {
         _id: userData._id,
         username: userData.username,
         email: userData.email,
+        bookedHotels: userData.bookedHotels
     }, TOKEN_SECRET);
 }
 

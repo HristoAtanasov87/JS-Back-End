@@ -1,4 +1,3 @@
-const { unsubscribe } = require('../controllers/hotelController');
 const Hotel = require('../models/Hotel');
 const User = require('../models/User');
 
