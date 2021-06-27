@@ -91,7 +91,7 @@ function parseToken(req, res) {
 
 async function refresh(email) {
     const user = await userService.getUserByEmail(email);
-
+    console.log(user);
 
     if (!user) {
         throw new Error('No such user');

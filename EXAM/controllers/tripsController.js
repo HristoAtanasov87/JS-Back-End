@@ -80,7 +80,7 @@ router.get('/join/:id', isUser(), async (req, res) => {
     try {
         const trip = await req.storage.getTripById(req.params.id);
 
-        if (trip.creator.map(d => d._id == req.user._id)) {
+        if (trip.creator.map(d => d._id) == req.user._id) {
             throw new Error('Cannot join your own trip!');
         }
         console.log(req.user._id);
